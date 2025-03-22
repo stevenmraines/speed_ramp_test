@@ -1,11 +1,11 @@
 [gd_scene load_steps=3 format=3 uid="uid://bcep4al2717ro"]
 
-[ext_resource type="PackedScene" uid="uid://kmw818s86gd1" path="res://assets/racer.glb" id="1_4ltxe"]
+[ext_resource type="PackedScene" uid="uid://kmw818s86gd1" path="res://assets/models/vehicles/default_racer/racer.glb" id="1_ul0wt"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d8h3k"]
 albedo_color = Color(1, 0, 0, 1)
 
-[node name="racer" instance=ExtResource("1_4ltxe")]
+[node name="racer" instance=ExtResource("1_ul0wt")]
 
 [node name="Cube" parent="." index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_d8h3k")

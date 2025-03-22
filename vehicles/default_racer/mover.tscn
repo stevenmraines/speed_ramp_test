@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://4es1hbtq882e"]
 
-[ext_resource type="Script" path="res://mover.gd" id="1_dhymx"]
-[ext_resource type="PackedScene" uid="uid://bcep4al2717ro" path="res://assets/racer_mesh.tscn" id="2_k5slt"]
+[ext_resource type="Script" path="res://vehicles/default_racer/mover.gd" id="1_dhymx"]
+[ext_resource type="PackedScene" uid="uid://bcep4al2717ro" path="res://vehicles/default_racer/racer_mesh.tscn" id="2_k5slt"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cgrtc"]
 

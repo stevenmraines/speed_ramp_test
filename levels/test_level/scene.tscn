@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://mhfmqwddetqp"]
 
-[ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://mover.tscn" id="1_e14jy"]
-[ext_resource type="Script" path="res://scene.gd" id="1_ncjh0"]
+[ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://vehicles/default_racer/mover.tscn" id="1_e14jy"]
+[ext_resource type="Script" path="res://levels/test_level/scene.gd" id="1_ncjh0"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_ccm8a"]
 size = Vector2(1000, 1000)

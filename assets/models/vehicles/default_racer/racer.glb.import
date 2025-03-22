@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://kmw818s86gd1"
-path="res://.godot/imported/racer.glb-7bafada3f5220f9f7cd4a91cee919c01.scn"
+path="res://.godot/imported/racer.glb-fc2d4b0e22bf597eff9fe13c77c0d010.scn"
 
 [deps]
 
-source_file="res://assets/racer.glb"
-dest_files=["res://.godot/imported/racer.glb-7bafada3f5220f9f7cd4a91cee919c01.scn"]
+source_file="res://assets/models/vehicles/default_racer/racer.glb"
+dest_files=["res://.godot/imported/racer.glb-fc2d4b0e22bf597eff9fe13c77c0d010.scn"]
 
 [params]
 
