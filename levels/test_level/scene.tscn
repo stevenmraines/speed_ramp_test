@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://mhfmqwddetqp"]
+[gd_scene load_steps=10 format=3 uid="uid://mhfmqwddetqp"]
 
 [ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://vehicles/default_racer/mover.tscn" id="1_e14jy"]
 [ext_resource type="Script" path="res://levels/test_level/scene.gd" id="1_ncjh0"]
+[ext_resource type="AudioStream" uid="uid://ssaoe37jl2f" path="res://assets/music/F-Zero X OST - Goal.mp3" id="3_n0xpk"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_ccm8a"]
 size = Vector2(1000, 1000)
@@ -151,3 +152,7 @@ grow_horizontal = 0
 grow_vertical = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_y6f40")
 show_percentage = false
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_n0xpk")
+autoplay = true
