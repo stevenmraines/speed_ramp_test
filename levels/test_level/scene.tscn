@@ -1,13 +1,19 @@
-[gd_scene load_steps=14 format=3 uid="uid://mhfmqwddetqp"]
+[gd_scene load_steps=16 format=3 uid="uid://mhfmqwddetqp"]
 
 [ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://vehicles/default_racer/mover.tscn" id="1_e14jy"]
 [ext_resource type="Script" path="res://levels/test_level/scene.gd" id="1_ncjh0"]
+[ext_resource type="Texture2D" uid="uid://dfh4fi5dserxv" path="res://addons/godot-prototype-texture/PNG/grid_1024x1024/grid_blue_1024x1024.png" id="2_77y82"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="3_fdu4u"]
 [ext_resource type="AudioStream" uid="uid://ssaoe37jl2f" path="res://assets/music/F-Zero X OST - Goal.mp3" id="3_n0xpk"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_2nn2w"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_7gwea"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gv48v"]
+albedo_texture = ExtResource("2_77y82")
+uv1_scale = Vector3(8, 8, 8)
+
 [sub_resource type="QuadMesh" id="QuadMesh_ccm8a"]
+material = SubResource("StandardMaterial3D_gv48v")
 size = Vector2(1000, 1000)
 orientation = 1
 
