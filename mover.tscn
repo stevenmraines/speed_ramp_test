@@ -1,0 +1,56 @@
+[gd_scene load_steps=10 format=3 uid="uid://4es1hbtq882e"]
+
+[ext_resource type="Script" path="res://mover.gd" id="1_dhymx"]
+[ext_resource type="PackedScene" uid="uid://bcep4al2717ro" path="res://assets/racer_mesh.tscn" id="2_k5slt"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cgrtc"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rfwe7"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_vi4v6"]
+material = SubResource("StandardMaterial3D_rfwe7")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xj57r"]
+size = Vector3(13.3061, 5.16846, 19.9323)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_pjhub"]
+gravity = Vector3(0, 0, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uuujq"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 0.733333, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_wnesd"]
+material = SubResource("StandardMaterial3D_uuujq")
+radius = 1.5
+height = 2.0
+radial_segments = 32
+rings = 16
+
+[node name="CharacterBody3D" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0397, 0)
+script = ExtResource("1_dhymx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+visible = false
+shape = SubResource("CapsuleShape3D_cgrtc")
+disabled = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("CapsuleMesh_vi4v6")
+
+[node name="racer" parent="." instance=ExtResource("2_k5slt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.03955, -5.01969)
+
+[node name="racer_collision_shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0290985, 1.61011, -0.129089)
+shape = SubResource("BoxShape3D_xj57r")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.08692, 9.72546)
+lifetime = 0.1
+process_material = SubResource("ParticleProcessMaterial_pjhub")
+draw_pass_1 = SubResource("SphereMesh_wnesd")

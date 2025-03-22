@@ -1,0 +1,153 @@
+[gd_scene load_steps=9 format=3 uid="uid://mhfmqwddetqp"]
+
+[ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://mover.tscn" id="1_e14jy"]
+[ext_resource type="Script" path="res://scene.gd" id="1_ncjh0"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_ccm8a"]
+size = Vector2(1000, 1000)
+orientation = 1
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_4kd56"]
+data = PackedVector3Array(500, 0, 500, -500, 0, 500, 500, 0, -500, -500, 0, 500, -500, 0, -500, 500, 0, -500)
+
+[sub_resource type="Curve" id="Curve_rmte1"]
+max_value = 10.0
+_data = [Vector2(0, 1), 0.0, 0.66, 0, 0, Vector2(1, 10), 30.72, 1.879, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_ptq4v"]
+min_value = 0.5
+_data = [Vector2(0, 0.5), 0.0, 1.54, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yrx04"]
+bg_color = Color(0.0666666, 1, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y6f40"]
+bg_color = Color(1, 0.516667, 0, 1)
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_ncjh0")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+light_energy = 3.0
+shadow_enabled = true
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_ccm8a")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Ground"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_4kd56")
+
+[node name="Mover" parent="." instance=ExtResource("1_e14jy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.15409, 0)
+speed_multiplier = 3000.0
+secs_till_max_speed = 1.5
+turn_speed = 2.5
+acceleration_curve = SubResource("Curve_rmte1")
+jump_charge_duration = 0.8
+jump_strength_multiplier = 400.0
+jump_strength_curve = SubResource("Curve_ptq4v")
+recenter_tilt_duration = 0.07
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, 0.0292046, -0.706503, -9.31323e-10, 0.999147, 0.0413015, 0.707107, -0.0292046, 0.706503, -100, 15, 100)
+fov = 28.7
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -98.0
+offset_top = 34.0
+offset_right = 99.0
+offset_bottom = 83.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+text = "Up/Down Arrow: Forwards/Backwards
+Left/Right Arrow: Turn Left/Right
+C: Recenter Position"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -78.0
+offset_right = 584.0
+offset_bottom = -38.0
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -17.0
+offset_right = 71.0
+offset_bottom = 17.0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "Speed"
+
+[node name="ProgressBar" type="ProgressBar" parent="CanvasLayer/Control"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 88.0
+offset_top = -13.0
+offset_right = 433.0
+offset_bottom = 14.0
+grow_vertical = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_yrx04")
+show_percentage = false
+
+[node name="JumpControl" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -584.0
+offset_top = -78.0
+offset_right = -40.0
+offset_bottom = -38.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="CanvasLayer/JumpControl"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 119.0
+offset_top = -17.0
+offset_right = 179.0
+offset_bottom = 17.0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "Jump"
+
+[node name="ProgressBar" type="ProgressBar" parent="CanvasLayer/JumpControl"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -345.0
+offset_top = -13.5
+offset_bottom = 13.5
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_y6f40")
+show_percentage = false
