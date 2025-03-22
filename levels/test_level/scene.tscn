@@ -62,15 +62,15 @@ shape = SubResource("ConcavePolygonShape3D_4kd56")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.15409, 0)
 speed_multiplier = 3000.0
 secs_till_max_speed = 1.5
-turn_speed = 2.5
 acceleration_curve = SubResource("Curve_rmte1")
+turn_speed = 2.5
+recenter_tilt_duration = 0.07
 jump_charge_duration = 0.8
 jump_strength_multiplier = 400.0
 jump_strength_curve = SubResource("Curve_ptq4v")
-recenter_tilt_duration = 0.07
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.707107, 0.052673, -0.705142, 1.86265e-09, 0.997222, 0.0744908, 0.707107, -0.0526729, 0.705142, -150, 25, 150)
+transform = Transform3D(0.707107, 0.052673, -0.705142, 1.86265e-09, 0.997222, 0.0744909, 0.707107, -0.052673, 0.705142, -150, 25, 150)
 fov = 50.0
 
 [node name="PhantomCameraHost" type="Node" parent="Camera3D"]

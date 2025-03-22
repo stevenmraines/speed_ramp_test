@@ -1,37 +1,47 @@
 extends CharacterBody3D
 
 
+@export_group("Speed")
 @export var speed_multiplier := 100.0
 @export var secs_till_max_speed := 3.0
-@export var turn_speed := 0.5
 @export var acceleration_curve : Curve
-@export var gravity := 9.8
-@export var jump_charge_duration := 1.0
-@export var jump_strength_multiplier := 10.0
-@export var jump_strength_curve : Curve
+@export_group("Turn")
+@export var turn_speed := 0.5
 @export var tilt_degrees := 15.0
 @export var tilt_duration := 0.3
 @export var recenter_tilt_duration := 0.15
+@export_group("Brake")
 @export var brake_duration := 1.0
+@export_group("Jump")
+@export var jump_charge_duration := 1.0
+@export var jump_strength_multiplier := 10.0
+@export var jump_strength_curve : Curve
 
 @onready var mesh := $racer
 
-var starting_position : Vector3
+# Speed vars
 var current_speed := 0.0
 var starting_speed := 0.0
 var max_speed := 0.0
 var secs_elapsed := 0.0
 
-var jump_charge_time_elapsed := 0.0
-
+# Turn vars
 var current_tilt_degrees := 0.0
 var tilt_time_elapsed := 0.0
 var recenter_tilt_time_elapsed := 0.0
 var last_tilt_direction := 0
 
+# Brake vars
 var braking_start_speed := 0.0
 var braking_start_velocity := Vector3.ZERO
 var braking_time_elapsed := 0.0
+
+# Jump vars
+var jump_charge_time_elapsed := 0.0
+
+# Other vars
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var starting_position : Vector3
 
 
 func _ready() -> void:
