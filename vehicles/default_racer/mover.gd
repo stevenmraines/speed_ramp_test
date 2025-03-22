@@ -29,7 +29,7 @@ var secs_elapsed := 0.0
 var current_tilt_degrees := 0.0
 var tilt_time_elapsed := 0.0
 var recenter_tilt_time_elapsed := 0.0
-var last_tilt_direction := 0
+var last_tilt_direction := 0.0
 
 # Brake vars
 var braking_start_speed := 0.0
@@ -59,17 +59,18 @@ func _process(delta: float) -> void:
 		secs_elapsed = 0.0
 	
 	# Handle turning
-	if Input.is_action_pressed("Left") or Input.is_action_pressed("Right"):
-		var turn_direction = 1 if Input.is_action_pressed("Left") else -1
-		rotate_y(turn_speed * delta * turn_direction)
+	var turn_axis = Input.get_axis("Right", "Left")
+	
+	if turn_axis != 0:
+		rotate_y(turn_speed * delta * turn_axis)
 		
 		# Handle tilt
 		tilt_time_elapsed += delta
 		# TODO Make from always go from current rotation? Probably need to grab the current rotation when direction is changed and go from that
 		var from = 0 if last_tilt_direction == 0 else mesh.rotation.z
 		var weight = min(1, tilt_time_elapsed / tilt_duration)
-		current_tilt_degrees = lerpf(from, tilt_degrees * turn_direction, weight)
-		last_tilt_direction = turn_direction
+		current_tilt_degrees = lerpf(from, tilt_degrees * turn_axis, weight)
+		last_tilt_direction = turn_axis
 	elif current_tilt_degrees != 0.0:
 		# Handle recenter tilt
 		recenter_tilt_time_elapsed += delta
