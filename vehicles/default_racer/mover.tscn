@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://4es1hbtq882e"]
+[gd_scene load_steps=11 format=3 uid="uid://4es1hbtq882e"]
 
 [ext_resource type="Script" path="res://vehicles/default_racer/mover.gd" id="1_dhymx"]
 [ext_resource type="PackedScene" uid="uid://bcep4al2717ro" path="res://vehicles/default_racer/racer_mesh.tscn" id="2_k5slt"]
+[ext_resource type="AudioStream" uid="uid://bh1n0yd65kogf" path="res://assets/sfx/vehicles/TECH CHARGER Power Up 01.ogg" id="3_pgnku"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cgrtc"]
 
@@ -49,8 +50,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.03955, -5.01969)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0290985, 1.61011, -0.129089)
 shape = SubResource("BoxShape3D_xj57r")
 
-[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+[node name="EngineParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.08692, 9.72546)
 lifetime = 0.1
 process_material = SubResource("ParticleProcessMaterial_pjhub")
 draw_pass_1 = SubResource("SphereMesh_wnesd")
+
+[node name="IdleSFXPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="BoostSFXPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_pgnku")

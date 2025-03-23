@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://mhfmqwddetqp"]
+[gd_scene load_steps=17 format=3 uid="uid://mhfmqwddetqp"]
 
 [ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://vehicles/default_racer/mover.tscn" id="1_e14jy"]
 [ext_resource type="Script" path="res://levels/test_level/scene.gd" id="1_ncjh0"]
@@ -7,6 +7,7 @@
 [ext_resource type="AudioStream" uid="uid://ssaoe37jl2f" path="res://assets/music/F-Zero X OST - Goal.mp3" id="3_n0xpk"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_2nn2w"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_7gwea"]
+[ext_resource type="PackedScene" uid="uid://bf7km6yx62lfy" path="res://levels/test_track/test_track.tscn" id="8_srlaf"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gv48v"]
 albedo_texture = ExtResource("2_77y82")
@@ -58,19 +59,26 @@ mesh = SubResource("QuadMesh_ccm8a")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_4kd56")
 
+[node name="Track" parent="." instance=ExtResource("8_srlaf")]
+transform = Transform3D(11, 0, 0, 0, 11, 0, 0, 0, 11, 0, 0, 0)
+visible = false
+
 [node name="Mover" parent="." instance=ExtResource("1_e14jy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.15409, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
 speed_multiplier = 3000.0
-secs_till_max_speed = 1.5
 acceleration_curve = SubResource("Curve_rmte1")
+boost_speed_multiplier = 6000.0
 turn_speed = 2.5
 recenter_tilt_duration = 0.07
 jump_charge_duration = 0.8
 jump_strength_multiplier = 400.0
 jump_strength_curve = SubResource("Curve_ptq4v")
 
+[node name="CameraFollowTarget" type="Node3D" parent="Mover"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.1756, 38.3161)
+
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.707107, 0.052673, -0.705142, 1.86265e-09, 0.997222, 0.0744909, 0.707107, -0.052673, 0.705142, -150, 25, 150)
+transform = Transform3D(1, 0, 0, 0, 0.937872, 0.34698, 0, -0.34698, 0.937872, 0, 24.1756, 38.3161)
 fov = 50.0
 
 [node name="PhantomCameraHost" type="Node" parent="Camera3D"]
@@ -78,9 +86,12 @@ process_priority = 300
 process_physics_priority = 300
 script = ExtResource("3_fdu4u")
 
-[node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("look_at_target")]
-transform = Transform3D(0.707107, 0.052673, -0.705142, 1.86265e-09, 0.997222, 0.0744908, 0.707107, -0.052673, 0.705142, -150, 25, 150)
+[node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target", "look_at_target")]
+transform = Transform3D(0.999998, 0, 0, 0, 0.937871, 0.346979, 0, -0.346979, 0.93787, 0, 24.1756, 38.3161)
+top_level = true
 script = ExtResource("4_2nn2w")
+follow_mode = 1
+follow_target = NodePath("../Mover/CameraFollowTarget")
 look_at_mode = 2
 look_at_target = NodePath("../Mover")
 tween_resource = SubResource("Resource_i8x5j")

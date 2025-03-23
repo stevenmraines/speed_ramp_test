@@ -13,6 +13,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	# Update speed progress bar
+	# FIXME This really isn't very accurate
 	var starting_speed = mover.starting_speed
 	var max_speed = mover.max_speed
 	var current_speed = mover.current_speed
