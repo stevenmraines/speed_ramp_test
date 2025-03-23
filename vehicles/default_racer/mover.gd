@@ -25,6 +25,7 @@ extends CharacterBody3D
 @onready var mesh := $racer
 @onready var engine_particles := $EngineParticles
 @onready var boost_sfx_player := $BoostSFXPlayer
+@onready var floor_raycaster := $FloorRaycaster
 
 # Speed vars
 var current_speed := 0.0
@@ -65,6 +66,22 @@ func _ready() -> void:
 	engine_particles_default_color = engine_particles_material.albedo_color
 
 
+func _physics_process(_delta: float) -> void:
+	if floor_raycaster.is_colliding():
+		var collision_normal = floor_raycaster.get_collision_normal()
+		var forward = global_basis.z
+		var right = forward.cross(collision_normal)
+		# FIXME This is real close, but it looks slightly sheared when you view with visible collision shapes
+		global_basis = Basis(right, collision_normal, forward).orthonormalized()
+		up_direction = collision_normal
+	else:
+		# TODO How to reset global basis?
+		var forward = global_basis.z
+		var right = forward.cross(Vector3.UP)
+		global_basis = Basis(right, Vector3.UP, forward).orthonormalized()
+		up_direction = Vector3.UP
+
+
 func _process(delta: float) -> void:
 	# Recenter position
 	if Input.is_action_just_released("Center"):
@@ -84,12 +101,14 @@ func _process(delta: float) -> void:
 		# TODO Make from always go from current rotation? Probably need to grab the current rotation when direction is changed and go from that
 		var from = 0 if last_tilt_direction == 0 else mesh.rotation.z
 		var weight = min(1, tilt_time_elapsed / tilt_duration)
-		current_tilt_degrees = lerpf(from, tilt_degrees * turn_axis, weight)
+		# FIXME Why do I need to invert tilt_degrees like this after handling the floor_raycaster stuff?
+		current_tilt_degrees = lerpf(from, -tilt_degrees * turn_axis, weight)
 		last_tilt_direction = turn_axis
 	elif current_tilt_degrees != 0.0:
 		# Handle recenter tilt
 		recenter_tilt_time_elapsed += delta
-		var from = tilt_degrees * last_tilt_direction
+		# FIXME Again, why do I need to invert last_tilt_direction after adding the floor_raycaster stuff?
+		var from = tilt_degrees * -last_tilt_direction
 		var weight = min(1, recenter_tilt_time_elapsed / recenter_tilt_duration)
 		current_tilt_degrees = lerpf(from, 0, weight)
 	else:

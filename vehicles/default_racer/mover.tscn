@@ -56,6 +56,12 @@ lifetime = 0.1
 process_material = SubResource("ParticleProcessMaterial_pjhub")
 draw_pass_1 = SubResource("SphereMesh_wnesd")
 
+[node name="FloorRaycaster" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.268962, 0)
+target_position = Vector3(0, -5, 0)
+debug_shape_custom_color = Color(0, 0.783333, 1, 1)
+debug_shape_thickness = 5
+
 [node name="IdleSFXPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="BoostSFXPlayer" type="AudioStreamPlayer" parent="."]
