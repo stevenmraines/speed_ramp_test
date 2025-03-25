@@ -1,0 +1,88 @@
+[gd_scene load_steps=11 format=3 uid="uid://jxvixjhpujaq"]
+
+[ext_resource type="Texture2D" uid="uid://bhilldffstny0" path="res://assets/textures/sci-fi road vertical.jpg" id="1_4f28r"]
+[ext_resource type="Texture2D" uid="uid://cr4e4r11p3nys" path="res://assets/textures/sci-fi road.jpg" id="1_xed12"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_353s6"]
+albedo_texture = ExtResource("1_xed12")
+uv1_scale = Vector3(1000, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pt334"]
+albedo_texture = ExtResource("1_4f28r")
+uv1_scale = Vector3(1, 1000, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u7n7i"]
+albedo_texture = ExtResource("1_4f28r")
+uv1_scale = Vector3(1, 1000, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hhfk3"]
+albedo_texture = ExtResource("1_4f28r")
+uv1_scale = Vector3(1, 1000, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_27ewe"]
+albedo_texture = ExtResource("1_xed12")
+uv1_scale = Vector3(1000, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yibuy"]
+albedo_texture = ExtResource("1_4f28r")
+uv1_scale = Vector3(1, 1000, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fiqlu"]
+albedo_texture = ExtResource("1_4f28r")
+uv1_scale = Vector3(1, 1000, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ij300"]
+albedo_texture = ExtResource("1_4f28r")
+uv1_scale = Vector3(1, 1000, 1)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Top" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+operation = 1
+use_collision = true
+size = Vector3(1, 1, 1000)
+material = SubResource("StandardMaterial3D_353s6")
+
+[node name="TopRight" type="CSGBox3D" parent="."]
+transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 1.351, 1.351, 0)
+use_collision = true
+size = Vector3(1, 1.405, 1000)
+material = SubResource("StandardMaterial3D_pt334")
+
+[node name="Right" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
+use_collision = true
+size = Vector3(1, 1, 1000)
+material = SubResource("StandardMaterial3D_u7n7i")
+
+[node name="BottomRight" type="CSGBox3D" parent="."]
+transform = Transform3D(-0.707107, -0.707107, 0, 0.707107, -0.707107, 0, 0, 0, 1, 1.351, -1.351, 0)
+use_collision = true
+size = Vector3(1, 1.405, 1000)
+material = SubResource("StandardMaterial3D_hhfk3")
+
+[node name="Bottom" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+operation = 1
+use_collision = true
+size = Vector3(1, 1, 1000)
+material = SubResource("StandardMaterial3D_27ewe")
+
+[node name="BottomLeft" type="CSGBox3D" parent="."]
+transform = Transform3D(-0.707107, 0.707107, 0, -0.707107, -0.707107, 0, 0, 0, 1, -1.351, -1.351, 0)
+use_collision = true
+size = Vector3(1, 1.405, 1000)
+material = SubResource("StandardMaterial3D_yibuy")
+
+[node name="Left" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
+use_collision = true
+size = Vector3(1, 1, 1000)
+material = SubResource("StandardMaterial3D_fiqlu")
+
+[node name="TopLeft" type="CSGBox3D" parent="."]
+transform = Transform3D(0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0, 1, -1.351, 1.351, 0)
+use_collision = true
+size = Vector3(1, 1.405, 1000)
+material = SubResource("StandardMaterial3D_ij300")

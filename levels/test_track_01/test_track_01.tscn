@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://doj7ctj8sa7p1"]
+
+[ext_resource type="PackedScene" uid="uid://b2udkgvd6nvid" path="res://levels/test_track_01/track_with_colliders.tscn" id="1_7q3pl"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="track" parent="." instance=ExtResource("1_7q3pl")]

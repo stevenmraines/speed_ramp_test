@@ -3,6 +3,7 @@ extends CharacterBody3D
 
 @export_group("Speed")
 @export var speed_multiplier := 100.0
+@export var reverse_speed_multiplier := 30.0
 @export var time_till_max_speed := 3.0
 @export var acceleration_curve : Curve
 @export_group("Boost")
@@ -10,6 +11,8 @@ extends CharacterBody3D
 @export var boost_duration := 2.0
 @export var boost_cooldown := 3.0
 @export var boost_gravity_modifier := 0.33
+@export_group("Strafe")
+@export var strafe_speed := 0.5
 @export_group("Turn")
 @export var turn_speed := 0.5
 @export var tilt_degrees := 15.0
@@ -21,11 +24,18 @@ extends CharacterBody3D
 @export var jump_charge_duration := 1.0
 @export var jump_strength_multiplier := 10.0
 @export var jump_strength_curve : Curve
+@export_group("")
+# Some additional gravitational force helps keep the
+# racer glued to the track when on pipes, loops, etc.
+@export var gravity_force_modifier := 10.0
+@export var no_clip_movement_speed := 100.0
 
 @onready var mesh := $racer
 @onready var engine_particles := $EngineParticles
 @onready var boost_sfx_player := $BoostSFXPlayer
 @onready var floor_raycaster := $FloorRaycaster
+@onready var collider := $RacerCollisionShape
+@onready var camera_rig := $CameraRig
 
 # Speed vars
 var current_speed := 0.0
@@ -50,9 +60,11 @@ var braking_time_elapsed := 0.0
 
 # Jump vars
 var jump_charge_time_elapsed := 0.0
+var is_jumping := false
 
 # Other vars
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var directed_gravity := Vector3(0, -gravity, 0)
 var starting_position : Vector3
 var engine_particles_material : StandardMaterial3D
 var engine_particles_default_color : Color
@@ -67,33 +79,62 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	# TODO Something like this may eventually be necessary: https://stackoverflow.com/questions/78658624/align-characterbody3d-in-godot-4-to-the-surface-of-a-cyllinder-or-other-meshes
 	if floor_raycaster.is_colliding():
+		var collision_point = floor_raycaster.get_collision_point()
 		var collision_normal = floor_raycaster.get_collision_normal()
+		var distance_to_collision = (collision_point - global_position).length()
+		var weight = min(1, distance_to_collision / abs(floor_raycaster.target_position.y))
+		# Smoothly lerp from UP to collision_normal depending
+		# on how far from the track your vehicle is
+		var up = lerp(collision_normal, Vector3.UP, weight)
 		var forward = global_basis.z
-		var right = forward.cross(collision_normal)
+		var right = forward.cross(up)
+		var camera_rig_forward = camera_rig.global_basis.z
+		var camera_rig_right = camera_rig_forward.cross(up)
 		# FIXME This is real close, but it looks slightly sheared when you view with visible collision shapes
 		global_basis = Basis(right, collision_normal, forward).orthonormalized()
 		up_direction = collision_normal
+		camera_rig.global_basis = Basis(camera_rig_right, collision_normal, camera_rig_forward).orthonormalized()
+		var gravity_force = gravity if ! is_boosted else gravity * boost_gravity_modifier
+		directed_gravity = -collision_normal * gravity_force
 	else:
-		# TODO How to reset global basis?
 		var forward = global_basis.z
 		var right = forward.cross(Vector3.UP)
+		var camera_rig_forward = camera_rig.global_basis.z
+		var camera_rig_right = camera_rig_forward.cross(Vector3.UP)
 		global_basis = Basis(right, Vector3.UP, forward).orthonormalized()
 		up_direction = Vector3.UP
+		camera_rig.global_basis = Basis(camera_rig_right, Vector3.UP, camera_rig_forward).orthonormalized()
+		directed_gravity = Vector3(0, -gravity, 0)
 
 
 func _process(delta: float) -> void:
+	# Handle noclip
+	if Input.is_action_just_released("No Clip"):
+		collider.disabled = ! collider.disabled
+	
+	if collider.disabled:
+		velocity = Vector3.ZERO
+		var vertical_axis = Input.get_axis("Backward", "Forward")
+		var horizontal_axis = Input.get_axis("Strafe Left", "Strafe Right")
+		global_position.x += horizontal_axis * no_clip_movement_speed * delta
+		global_position.y += vertical_axis * no_clip_movement_speed * delta
+		return
+	
 	# Recenter position
 	if Input.is_action_just_released("Center"):
 		global_position = starting_position
 		velocity = Vector3.ZERO
 		current_speed = 0.0
 		movement_time_elapsed = 0.0
+		directed_gravity = Vector3(0, -gravity, 0)
 	
 	# Handle turning
-	var turn_axis = Input.get_axis("Right", "Left")
+	var turn_axis = Input.get_axis("Turn Right", "Turn Left")
 	
 	if turn_axis != 0:
+		# FIXME This doesn't always turn the right direction when riding on pipes
 		rotate_y(turn_speed * delta * turn_axis)
 		
 		# Handle tilt
@@ -134,17 +175,31 @@ func _process(delta: float) -> void:
 	
 	# Handle Movement
 	if Input.is_action_pressed("Forward") or Input.is_action_pressed("Backward"):
-		current_speed = speed_multiplier * acceleration_curve.sample(movement_time_elapsed / time_till_max_speed)
-		if is_boosted:
+		var move_direction = Input.get_axis("Backward", "Forward")
+		var acceleration_sample = acceleration_curve.sample(movement_time_elapsed / time_till_max_speed)
+		current_speed = speed_multiplier * acceleration_sample
+		if move_direction < 0:
+			current_speed = reverse_speed_multiplier * acceleration_sample
+		elif is_boosted:
 			current_speed = boost_speed_multiplier * acceleration_curve.sample(movement_time_elapsed / time_till_max_speed)
 		movement_time_elapsed = min(time_till_max_speed, movement_time_elapsed + delta)
-		var move_direction = Input.get_axis("Backward", "Forward")
 		var forward = -global_basis.z
 		var velocity_y = velocity.y
 		velocity = move_direction * forward * current_speed * delta
 		velocity.y = velocity_y
 	elif movement_time_elapsed > 0:
 		movement_time_elapsed = 0.0
+	
+	# Handle strafing
+	# FIXME Strafe velocity needs to be relative to basis
+	#var strafe_axis = Input.get_axis("Strafe Left", "Strafe Right")
+	#if strafe_axis != 0:
+		#velocity.x += strafe_axis * strafe_speed * delta
+		#mesh.rotate_z(strafe_axis * deg_to_rad(15))
+	#else:
+		# FIXME This is making it so that you can only move forward and backward, turning doesn't work
+		#velocity.x = 0
+		#mesh.rotate_z(0)
 	
 	# Handle braking
 	if Input.is_action_pressed("Brake"):
@@ -164,14 +219,21 @@ func _process(delta: float) -> void:
 		braking_time_elapsed = 0
 	
 	# Handle jumping
+	if is_jumping and is_on_floor():
+		is_jumping = false
+	
 	if Input.is_action_pressed("Jump"):
 		jump_charge_time_elapsed = min(jump_charge_duration, jump_charge_time_elapsed + delta)
-	elif Input.is_action_just_released("Jump"):
+	elif Input.is_action_just_released("Jump") and ! is_jumping:
+		is_jumping = true
 		var jump_strength_sample = jump_strength_curve.sample(jump_charge_time_elapsed / jump_charge_duration)
-		velocity.y += jump_strength_sample * jump_strength_multiplier
+		# Jump needs to apply force opposite to direction of gravity
+		# FIXME Seems like we need to relax the gravity_force_modifier while jumping, but how do you tell when the jump is finished? When the next collision happens with a track surface?
+		velocity += -directed_gravity * jump_strength_sample * jump_strength_multiplier
 		jump_charge_time_elapsed = 0
 	
 	# Handle gravity
-	velocity.y -= gravity if ! is_boosted else gravity * boost_gravity_modifier
+	var force_modifier = gravity_force_modifier if ! is_jumping else 1.0
+	velocity += directed_gravity * force_modifier
 	
 	move_and_slide()
