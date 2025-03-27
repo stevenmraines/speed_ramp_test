@@ -1,18 +1,10 @@
-[gd_scene load_steps=14 format=3 uid="uid://4es1hbtq882e"]
+[gd_scene load_steps=11 format=3 uid="uid://4es1hbtq882e"]
 
 [ext_resource type="Script" path="res://vehicles/default_racer/mover.gd" id="1_dhymx"]
 [ext_resource type="PackedScene" uid="uid://bcep4al2717ro" path="res://vehicles/default_racer/racer_mesh.tscn" id="2_k5slt"]
 [ext_resource type="AudioStream" uid="uid://bh1n0yd65kogf" path="res://assets/sfx/vehicles/TECH CHARGER Power Up 01.ogg" id="3_pgnku"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_vj7tj"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_ml3ey"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cgrtc"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rfwe7"]
-albedo_color = Color(1, 0, 0, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_vi4v6"]
-material = SubResource("StandardMaterial3D_rfwe7")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3k0ch"]
 radius = 2.9
@@ -43,15 +35,6 @@ ease = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0397, 0)
 script = ExtResource("1_dhymx")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-visible = false
-shape = SubResource("CapsuleShape3D_cgrtc")
-disabled = true
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-visible = false
-mesh = SubResource("CapsuleMesh_vi4v6")
-
 [node name="racer" parent="." instance=ExtResource("2_k5slt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.03955, -5.01969)
 
@@ -70,6 +53,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.268962, 0)
 target_position = Vector3(0, -500, 0)
 debug_shape_custom_color = Color(0, 0.783333, 1, 1)
 debug_shape_thickness = 5
+
+[node name="RightWallRaycaster" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.35583, 0, 0)
+target_position = Vector3(100, 0, 0)
 
 [node name="CameraRig" type="Node3D" parent="."]
 

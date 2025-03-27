@@ -61,7 +61,6 @@ visible = false
 
 [node name="Pipe" parent="." instance=ExtResource("4_ex2c6")]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
-visible = false
 
 [node name="InsidePipe" parent="." instance=ExtResource("5_0ka82")]
 transform = Transform3D(36, 0, 0, 0, 36, 0, 0, 0, 36, 0, 273.136, 0)
@@ -81,9 +80,8 @@ strafe_speed = 600.0
 turn_speed = 2.5
 recenter_tilt_duration = 0.07
 jump_charge_duration = 0.8
-jump_strength_multiplier = 75.0
+jump_strength_multiplier = 1000.0
 jump_strength_curve = SubResource("Curve_ptq4v")
-gravity_force_modifier = 50.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -2079.15, 343.667, 133.481)

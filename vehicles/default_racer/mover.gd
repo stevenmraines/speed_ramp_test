@@ -25,15 +25,14 @@ extends CharacterBody3D
 @export var jump_strength_multiplier := 10.0
 @export var jump_strength_curve : Curve
 @export_group("")
-# Some additional gravitational force helps keep the
-# racer glued to the track when on pipes, loops, etc.
-@export var gravity_force_modifier := 10.0
+@export var grounded_gravity_modifier := 10.0
 @export var no_clip_movement_speed := 100.0
 
 @onready var mesh := $racer
 @onready var engine_particles := $EngineParticles
 @onready var boost_sfx_player := $BoostSFXPlayer
 @onready var floor_raycaster := $FloorRaycaster
+@onready var right_wall_raycaster := $RightWallRaycaster
 @onready var collider := $RacerCollisionShape
 @onready var camera_rig := $CameraRig
 
@@ -63,8 +62,8 @@ var jump_charge_time_elapsed := 0.0
 var is_jumping := false
 
 # Other vars
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-var directed_gravity := Vector3(0, -gravity, 0)
+var base_gravity_force = ProjectSettings.get_setting("physics/3d/default_gravity")
+var gravity_direction := Vector3.DOWN
 var starting_position : Vector3
 var engine_particles_material : StandardMaterial3D
 var engine_particles_default_color : Color
@@ -80,33 +79,35 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	# TODO Something like this may eventually be necessary: https://stackoverflow.com/questions/78658624/align-characterbody3d-in-godot-4-to-the-surface-of-a-cyllinder-or-other-meshes
-	if floor_raycaster.is_colliding():
-		var collision_point = floor_raycaster.get_collision_point()
-		var collision_normal = floor_raycaster.get_collision_normal()
+	if floor_raycaster.is_colliding() or right_wall_raycaster.is_colliding():
+		var raycaster = floor_raycaster if floor_raycaster.is_colliding() \
+			else right_wall_raycaster
+		var collision_point = raycaster.get_collision_point()
+		var collision_normal = raycaster.get_collision_normal()
 		var distance_to_collision = (collision_point - global_position).length()
-		var weight = min(1, distance_to_collision / abs(floor_raycaster.target_position.y))
+		var max_distance = abs(raycaster.target_position.y) if \
+			floor_raycaster.is_colliding() else abs(raycaster.target_position.x)
+		var weight = min(1, distance_to_collision / max_distance)
 		# Smoothly lerp from UP to collision_normal depending
 		# on how far from the track your vehicle is
-		var up = lerp(collision_normal, Vector3.UP, weight)
-		var forward = global_basis.z
-		var right = forward.cross(up)
-		var camera_rig_forward = camera_rig.global_basis.z
-		var camera_rig_right = camera_rig_forward.cross(up)
-		# FIXME This is real close, but it looks slightly sheared when you view with visible collision shapes
-		global_basis = Basis(right, collision_normal, forward).orthonormalized()
 		up_direction = collision_normal
-		camera_rig.global_basis = Basis(camera_rig_right, collision_normal, camera_rig_forward).orthonormalized()
-		var gravity_force = gravity if ! is_boosted else gravity * boost_gravity_modifier
-		directed_gravity = -collision_normal * gravity_force
+		gravity_direction = -up_direction
+		var up = lerp(up_direction, Vector3.UP, weight)
+		var back = global_basis.z
+		var right = up.cross(back)
+		var camera_rig_back = camera_rig.global_basis.z
+		var camera_rig_right = up.cross(camera_rig_back)
+		global_basis = Basis(right, up_direction, back).orthonormalized()
+		camera_rig.global_basis = Basis(camera_rig_right, up_direction, camera_rig_back).orthonormalized()
 	else:
-		var forward = global_basis.z
-		var right = forward.cross(Vector3.UP)
-		var camera_rig_forward = camera_rig.global_basis.z
-		var camera_rig_right = camera_rig_forward.cross(Vector3.UP)
-		global_basis = Basis(right, Vector3.UP, forward).orthonormalized()
 		up_direction = Vector3.UP
-		camera_rig.global_basis = Basis(camera_rig_right, Vector3.UP, camera_rig_forward).orthonormalized()
-		directed_gravity = Vector3(0, -gravity, 0)
+		gravity_direction = Vector3.DOWN
+		var back = global_basis.z
+		var right = up_direction.cross(back)
+		var camera_rig_back = camera_rig.global_basis.z
+		var camera_rig_right = up_direction.cross(camera_rig_back)
+		global_basis = Basis(right, up_direction, back).orthonormalized()
+		camera_rig.global_basis = Basis(camera_rig_right, up_direction, camera_rig_back).orthonormalized()
 
 
 func _process(delta: float) -> void:
@@ -128,9 +129,10 @@ func _process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		current_speed = 0.0
 		movement_time_elapsed = 0.0
-		directed_gravity = Vector3(0, -gravity, 0)
+		gravity_direction = Vector3.DOWN
 	
 	# Handle turning
+	# right == negative axis because negative rotation is CW in Godot
 	var turn_axis = Input.get_axis("Turn Right", "Turn Left")
 	
 	if turn_axis != 0:
@@ -142,14 +144,12 @@ func _process(delta: float) -> void:
 		# TODO Make from always go from current rotation? Probably need to grab the current rotation when direction is changed and go from that
 		var from = 0 if last_tilt_direction == 0 else mesh.rotation.z
 		var weight = min(1, tilt_time_elapsed / tilt_duration)
-		# FIXME Why do I need to invert tilt_degrees like this after handling the floor_raycaster stuff?
-		current_tilt_degrees = lerpf(from, -tilt_degrees * turn_axis, weight)
+		current_tilt_degrees = lerpf(from, tilt_degrees * turn_axis, weight)
 		last_tilt_direction = turn_axis
 	elif current_tilt_degrees != 0.0:
 		# Handle recenter tilt
 		recenter_tilt_time_elapsed += delta
-		# FIXME Again, why do I need to invert last_tilt_direction after adding the floor_raycaster stuff?
-		var from = tilt_degrees * -last_tilt_direction
+		var from = tilt_degrees * last_tilt_direction
 		var weight = min(1, recenter_tilt_time_elapsed / recenter_tilt_duration)
 		current_tilt_degrees = lerpf(from, 0, weight)
 	else:
@@ -218,6 +218,18 @@ func _process(delta: float) -> void:
 		braking_start_velocity = Vector3.ZERO
 		braking_time_elapsed = 0
 	
+	# Set gravity force
+	var gravity_force := 0.0
+	var final_gravity_direction = gravity_direction
+	if floor_raycaster.is_colliding() or right_wall_raycaster.is_colliding():
+		# A little extra force helps keep the racer glued to the track when
+		# going fast on the inside or outside of pipes, on walls, etc.
+		gravity_force = base_gravity_force * grounded_gravity_modifier
+	elif is_boosted:
+		gravity_force = base_gravity_force * boost_gravity_modifier
+	elif is_jumping:
+		gravity_force = base_gravity_force
+	
 	# Handle jumping
 	if is_jumping and is_on_floor():
 		is_jumping = false
@@ -227,13 +239,12 @@ func _process(delta: float) -> void:
 	elif Input.is_action_just_released("Jump") and ! is_jumping:
 		is_jumping = true
 		var jump_strength_sample = jump_strength_curve.sample(jump_charge_time_elapsed / jump_charge_duration)
-		# Jump needs to apply force opposite to direction of gravity
-		# FIXME Seems like we need to relax the gravity_force_modifier while jumping, but how do you tell when the jump is finished? When the next collision happens with a track surface?
-		velocity += -directed_gravity * jump_strength_sample * jump_strength_multiplier
+		gravity_force = jump_strength_sample * jump_strength_multiplier
+		# Apply jump force opposite to direction of gravity
+		final_gravity_direction = -gravity_direction
 		jump_charge_time_elapsed = 0
 	
-	# Handle gravity
-	var force_modifier = gravity_force_modifier if ! is_jumping else 1.0
-	velocity += directed_gravity * force_modifier
+	# Apply gravity
+	velocity += final_gravity_direction * gravity_force
 	
 	move_and_slide()
