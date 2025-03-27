@@ -176,12 +176,21 @@ func _process(delta: float) -> void:
 	# Handle Movement
 	if Input.is_action_pressed("Forward") or Input.is_action_pressed("Backward"):
 		var move_direction = Input.get_axis("Backward", "Forward")
+		if current_speed > 0 and movement_time_elapsed == 0:
+			# Figure out movement_time_elapsed from current_speed
+			var previous_acceleration_sample = current_speed / speed_multiplier
+			var number_of_points = acceleration_curve.point_count
+			var last_point = acceleration_curve.get_point_position(number_of_points - 1)
+			var max_acceleration = last_point.y
+			var previous_x_value = previous_acceleration_sample / max_acceleration
+			movement_time_elapsed = previous_x_value * time_till_max_speed
 		var acceleration_sample = acceleration_curve.sample(movement_time_elapsed / time_till_max_speed)
 		current_speed = speed_multiplier * acceleration_sample
 		if move_direction < 0:
 			current_speed = reverse_speed_multiplier * acceleration_sample
 		elif is_boosted:
-			current_speed = boost_speed_multiplier * acceleration_curve.sample(movement_time_elapsed / time_till_max_speed)
+			current_speed = boost_speed_multiplier \
+			* acceleration_curve.sample(movement_time_elapsed / time_till_max_speed)
 		movement_time_elapsed = min(time_till_max_speed, movement_time_elapsed + delta)
 		var forward = -global_basis.z
 		var velocity_y = velocity.y
@@ -194,7 +203,7 @@ func _process(delta: float) -> void:
 	# FIXME Strafe velocity needs to be relative to basis
 	#var strafe_axis = Input.get_axis("Strafe Left", "Strafe Right")
 	#if strafe_axis != 0:
-		#velocity.x += strafe_axis * strafe_speed * delta
+		#velocity += global_basis.x * strafe_axis * strafe_speed * delta
 		#mesh.rotate_z(strafe_axis * deg_to_rad(15))
 	#else:
 		# FIXME This is making it so that you can only move forward and backward, turning doesn't work
@@ -224,7 +233,8 @@ func _process(delta: float) -> void:
 	if floor_raycaster.is_colliding() or right_wall_raycaster.is_colliding():
 		# A little extra force helps keep the racer glued to the track when
 		# going fast on the inside or outside of pipes, on walls, etc.
-		gravity_force = base_gravity_force * grounded_gravity_modifier
+		#gravity_force = base_gravity_force * grounded_gravity_modifier
+		gravity_force = base_gravity_force
 	elif is_boosted:
 		gravity_force = base_gravity_force * boost_gravity_modifier
 	elif is_jumping:

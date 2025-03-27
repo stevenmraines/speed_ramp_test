@@ -19,7 +19,8 @@ uv1_scale = Vector3(1, 8, 1)
 curve = SubResource("Curve3D_ed1x2")
 
 [node name="CSGPolygon3D" type="CSGPolygon3D" parent="."]
-polygon = PackedVector2Array(0, 0, 0, 0, 2, -0.5, 2, -0.5)
+use_collision = true
+polygon = PackedVector2Array(0, -2, 0, 0, 2, -0.5, 2, -2)
 mode = 2
 path_node = NodePath("../Path3D")
 path_interval_type = 0
