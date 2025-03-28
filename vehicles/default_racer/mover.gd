@@ -4,6 +4,8 @@ extends CharacterBody3D
 @export_group("Speed")
 @export var speed_multiplier := 100.0
 @export var reverse_speed_multiplier := 30.0
+# TODO Implement speed decay
+@export var speed_decay_multiplier := 100.0
 @export var time_till_max_speed := 3.0
 @export var acceleration_curve : Curve
 @export_group("Boost")
@@ -78,6 +80,10 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	# Don't apply gravity while noclip is active
+	if collider.disabled:
+		return
+	
 	# TODO Something like this may eventually be necessary: https://stackoverflow.com/questions/78658624/align-characterbody3d-in-godot-4-to-the-surface-of-a-cyllinder-or-other-meshes
 	if floor_raycaster.is_colliding() or right_wall_raycaster.is_colliding():
 		var raycaster = floor_raycaster if floor_raycaster.is_colliding() \
@@ -88,39 +94,29 @@ func _physics_process(_delta: float) -> void:
 		var max_distance = abs(raycaster.target_position.y) if \
 			floor_raycaster.is_colliding() else abs(raycaster.target_position.x)
 		var weight = min(1, distance_to_collision / max_distance)
-		# Smoothly lerp from UP to collision_normal depending
-		# on how far from the track your vehicle is
-		up_direction = collision_normal
-		gravity_direction = -up_direction
-		var up = lerp(up_direction, Vector3.UP, weight)
-		var back = global_basis.z
-		var right = up.cross(back)
-		var camera_rig_back = camera_rig.global_basis.z
-		var camera_rig_right = up.cross(camera_rig_back)
-		global_basis = Basis(right, up_direction, back).orthonormalized()
-		camera_rig.global_basis = Basis(camera_rig_right, up_direction, camera_rig_back).orthonormalized()
+		_set_up_direction(collision_normal, weight)
 	else:
-		up_direction = Vector3.UP
-		gravity_direction = Vector3.DOWN
-		var back = global_basis.z
-		var right = up_direction.cross(back)
-		var camera_rig_back = camera_rig.global_basis.z
-		var camera_rig_right = up_direction.cross(camera_rig_back)
-		global_basis = Basis(right, up_direction, back).orthonormalized()
-		camera_rig.global_basis = Basis(camera_rig_right, up_direction, camera_rig_back).orthonormalized()
+		_set_up_direction(Vector3.UP)
 
 
+# TODO Seems like maybe we need to keep all of our different velocities in separate vars like jump_velocity, gravity_velocity, movement_velocity, etc. and apply them all just before calling move_and_slide
 func _process(delta: float) -> void:
 	# Handle noclip
 	if Input.is_action_just_released("No Clip"):
 		collider.disabled = ! collider.disabled
 	
 	if collider.disabled:
+		if global_basis.y != Vector3.UP:
+			_set_up_direction(Vector3.UP)
 		velocity = Vector3.ZERO
-		var vertical_axis = Input.get_axis("Backward", "Forward")
-		var horizontal_axis = Input.get_axis("Strafe Left", "Strafe Right")
-		global_position.x += horizontal_axis * no_clip_movement_speed * delta
-		global_position.y += vertical_axis * no_clip_movement_speed * delta
+		var noclip_turn_axis = Input.get_axis("Turn Right", "Turn Left")
+		rotate_y(turn_speed * delta * noclip_turn_axis)
+		var noclip_vertical_axis = Input.get_axis("No Clip Down", "No Clip Up")
+		var noclip_strafe_axis = Input.get_axis("Strafe Left", "Strafe Right")
+		var noclip_forward_axis = Input.get_axis("Backward", "Forward")
+		global_position += -global_basis.z * noclip_forward_axis * no_clip_movement_speed * delta
+		global_position += global_basis.x * noclip_strafe_axis * no_clip_movement_speed * delta
+		global_position.y += noclip_vertical_axis * no_clip_movement_speed * delta
 		return
 	
 	# Recenter position
@@ -258,3 +254,28 @@ func _process(delta: float) -> void:
 	velocity += final_gravity_direction * gravity_force
 	
 	move_and_slide()
+
+
+func _set_up_direction(up : Vector3, _lerp_weight := 1.0) -> void:
+	if up == Vector3.UP:
+		up_direction = up
+		gravity_direction = Vector3.DOWN
+		var back = global_basis.z
+		var right = up_direction.cross(back)
+		var camera_rig_back = camera_rig.global_basis.z
+		var camera_rig_right = up_direction.cross(camera_rig_back)
+		global_basis = Basis(right, up_direction, back).orthonormalized()
+		camera_rig.global_basis = Basis(camera_rig_right, up_direction, camera_rig_back).orthonormalized()
+	else:
+		# TODO Get lerp working later, disabling for now
+		# Smoothly lerp from UP to collision_normal depending
+		# on how far from the track your vehicle is
+		up_direction = up
+		gravity_direction = -up_direction
+		#var up = lerp(up_direction, Vector3.UP, lerp_weight)
+		var back = global_basis.z
+		var right = up.cross(back)
+		var camera_rig_back = camera_rig.global_basis.z
+		var camera_rig_right = up.cross(camera_rig_back)
+		global_basis = Basis(right, up, back).orthonormalized()
+		camera_rig.global_basis = Basis(camera_rig_right, up, camera_rig_back).orthonormalized()

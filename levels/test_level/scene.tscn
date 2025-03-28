@@ -81,9 +81,10 @@ recenter_tilt_duration = 0.07
 jump_charge_duration = 0.8
 jump_strength_multiplier = 500.0
 jump_strength_curve = SubResource("Curve_ptq4v")
+no_clip_movement_speed = 300.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -5.362, -120.923, -595.864)
+transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -5.362, -120.923, -595.865)
 current = true
 fov = 50.0
 
