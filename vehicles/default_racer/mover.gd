@@ -27,6 +27,7 @@ extends CharacterBody3D
 @export var jump_strength_multiplier := 10.0
 @export var jump_strength_curve : Curve
 @export_group("")
+@export var drift_factor := 0.85
 @export var grounded_gravity_modifier := 10.0
 @export var no_clip_movement_speed := 100.0
 
@@ -133,7 +134,8 @@ func _process(delta: float) -> void:
 	
 	if turn_axis != 0:
 		# FIXME This doesn't always turn the right direction when riding on pipes
-		rotate_y(turn_speed * delta * turn_axis)
+		#rotate_y(turn_speed * delta * turn_axis)
+		transform = transform.rotated_local(transform.basis.y, turn_speed * delta * turn_axis)
 		
 		# Handle tilt
 		tilt_time_elapsed += delta
@@ -194,6 +196,12 @@ func _process(delta: float) -> void:
 		velocity.y = velocity_y
 	elif movement_time_elapsed > 0:
 		movement_time_elapsed = 0.0
+	
+	# Handle drift
+	# TODO Figure out drifting logic
+	#var right_dir = transform.basis.x
+	#var lateral = right_dir * velocity.dot(right_dir)
+	#velocity -= lateral * drift_factor * delta
 	
 	# Handle strafing
 	# FIXME Strafe velocity needs to be relative to basis

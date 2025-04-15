@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3 uid="uid://dggn1oq0rq0bb"]
+
+[ext_resource type="Texture2D" uid="uid://dfh4fi5dserxv" path="res://addons/godot-prototype-texture/PNG/grid_1024x1024/grid_blue_1024x1024.png" id="1_k853j"]
+[ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="2_oqs1g"]
+[ext_resource type="PackedScene" uid="uid://dbmdoym542sq1" path="res://vehicles/chatgpt_racer/chatgpt_racer.tscn" id="3_dy2uv"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e75lb"]
+albedo_texture = ExtResource("1_k853j")
+uv1_scale = Vector3(10, 10, 10)
+
+[sub_resource type="QuadMesh" id="QuadMesh_shqg5"]
+material = SubResource("StandardMaterial3D_e75lb")
+size = Vector2(10000, 10000)
+subdivide_width = 1
+subdivide_depth = 1
+orientation = 1
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_55ys6"]
+data = PackedVector3Array(5000, 0, 5000, 0, 0, 5000, 5000, 0, 0, 0, 0, 5000, 0, 0, 0, 5000, 0, 0, 0, 0, 5000, -5000, 0, 5000, 0, 0, 0, -5000, 0, 5000, -5000, 0, 0, 0, 0, 0, 5000, 0, 0, 0, 0, 0, 5000, 0, -5000, 0, 0, 0, 0, 0, -5000, 5000, 0, -5000, 0, 0, 0, -5000, 0, 0, 0, 0, -5000, -5000, 0, 0, -5000, 0, -5000, 0, 0, -5000)
+
+[node name="Plane" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+light_energy = 6.0
+shadow_enabled = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_shqg5")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_55ys6")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, 0, 371.846, 38.3161)
+
+[node name="PhantomCameraHost" type="Node" parent="Camera3D"]
+process_priority = 300
+process_physics_priority = 300
+script = ExtResource("2_oqs1g")
+
+[node name="Racer" parent="." instance=ExtResource("3_dy2uv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 357.67, 0)
+acceleration = 2000.0
+max_speed = 20000.0
+turn_speed = 2.0
+brake_force = 200.0
+drift_factor = 1.5
+friction = 16.0
