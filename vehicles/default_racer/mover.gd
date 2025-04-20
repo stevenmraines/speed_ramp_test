@@ -12,7 +12,6 @@ extends CharacterBody3D
 @export var boost_speed_multiplier := 200.0
 @export var boost_duration := 2.0
 @export var boost_cooldown := 3.0
-@export var boost_gravity_modifier := 0.33
 @export_group("Strafe")
 @export var strafe_speed := 0.5
 @export_group("Turn")
@@ -26,18 +25,23 @@ extends CharacterBody3D
 @export var jump_charge_duration := 1.0
 @export var jump_strength_multiplier := 10.0
 @export var jump_strength_curve : Curve
+@export_group("Gravity")
+@export var grounded_gravity_modifier := 10.0
+@export var boost_gravity_modifier := 0.33
 @export_group("")
 @export var drift_factor := 0.85
-@export var grounded_gravity_modifier := 10.0
 @export var no_clip_movement_speed := 100.0
 
 @onready var mesh := $racer
 @onready var engine_particles := $EngineParticles
 @onready var boost_sfx_player := $BoostSFXPlayer
+# TODO Might be better to have 4 raycasters and average their collision normals for the up direction
 @onready var floor_raycaster := $FloorRaycaster
 @onready var right_wall_raycaster := $RightWallRaycaster
 @onready var collider := $RacerCollisionShape
 @onready var camera_rig := $CameraRig
+@onready var pcam := $CameraRig/PhantomCamera3D
+@onready var camera_up_target := $CameraRig/CameraUpDirectionTarget
 
 # Speed vars
 var current_speed := 0.0
@@ -78,6 +82,9 @@ func _ready() -> void:
 	max_speed = speed_multiplier * acceleration_curve.sample(1)
 	engine_particles_material = engine_particles.draw_pass_1.material
 	engine_particles_default_color = engine_particles_material.albedo_color
+	# Setting this in the script rather than the inspector because it unsets
+	# itself every time I switch from this scene to another, for some reason.
+	pcam.set_up_target(camera_up_target)
 
 
 func _physics_process(_delta: float) -> void:
@@ -133,9 +140,16 @@ func _process(delta: float) -> void:
 	var turn_axis = Input.get_axis("Turn Right", "Turn Left")
 	
 	if turn_axis != 0:
-		# FIXME This doesn't always turn the right direction when riding on pipes
-		#rotate_y(turn_speed * delta * turn_axis)
-		transform = transform.rotated_local(transform.basis.y, turn_speed * delta * turn_axis)
+		var angle = turn_speed * delta * turn_axis
+		var up_axis = global_basis.y
+		var origin = global_transform.origin
+		# TODO Do something like this for when we set the up direction?
+		# Create a rotation basis around the up axis
+		var rot = Basis(up_axis, angle)
+		# Move the object relative to its own origin
+		global_transform.origin = Vector3.ZERO
+		global_transform = rot * global_basis
+		global_transform.origin = origin
 		
 		# Handle tilt
 		tilt_time_elapsed += delta
@@ -199,20 +213,22 @@ func _process(delta: float) -> void:
 	
 	# Handle drift
 	# TODO Figure out drifting logic
-	#var right_dir = transform.basis.x
-	#var lateral = right_dir * velocity.dot(right_dir)
-	#velocity -= lateral * drift_factor * delta
+	var right_dir = transform.basis.x
+	var lateral = right_dir * velocity.dot(right_dir)
+	velocity -= lateral * drift_factor * delta
 	
 	# Handle strafing
 	# FIXME Strafe velocity needs to be relative to basis
-	#var strafe_axis = Input.get_axis("Strafe Left", "Strafe Right")
-	#if strafe_axis != 0:
-		#velocity += global_basis.x * strafe_axis * strafe_speed * delta
-		#mesh.rotate_z(strafe_axis * deg_to_rad(15))
-	#else:
-		# FIXME This is making it so that you can only move forward and backward, turning doesn't work
-		#velocity.x = 0
-		#mesh.rotate_z(0)
+	var strafe_axis = Input.get_axis("Strafe Left", "Strafe Right")
+	var strafe_velocity = Vector3.ZERO
+	var strafe_tilt_degrees = 0
+	
+	if strafe_axis != 0:
+		strafe_velocity = global_basis.x * strafe_axis * strafe_speed * delta
+		strafe_tilt_degrees = strafe_axis * -deg_to_rad(tilt_degrees)
+	
+	velocity += strafe_velocity
+	mesh.rotate_z(strafe_tilt_degrees)
 	
 	# Handle braking
 	if Input.is_action_pressed("Brake"):
@@ -237,11 +253,12 @@ func _process(delta: float) -> void:
 	if floor_raycaster.is_colliding() or right_wall_raycaster.is_colliding():
 		# A little extra force helps keep the racer glued to the track when
 		# going fast on the inside or outside of pipes, on walls, etc.
-		#gravity_force = base_gravity_force * grounded_gravity_modifier
-		gravity_force = base_gravity_force
+		gravity_force = base_gravity_force * grounded_gravity_modifier
 	elif is_boosted:
 		gravity_force = base_gravity_force * boost_gravity_modifier
 	elif is_jumping:
+		gravity_force = base_gravity_force
+	else:
 		gravity_force = base_gravity_force
 	
 	# Handle jumping

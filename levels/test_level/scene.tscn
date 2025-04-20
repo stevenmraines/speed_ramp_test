@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://mhfmqwddetqp"]
+[gd_scene load_steps=20 format=3 uid="uid://mhfmqwddetqp"]
 
 [ext_resource type="PackedScene" uid="uid://4es1hbtq882e" path="res://vehicles/default_racer/mover.tscn" id="1_e14jy"]
 [ext_resource type="Script" path="res://levels/test_level/scene.gd" id="1_ncjh0"]
@@ -10,13 +10,26 @@
 [ext_resource type="PackedScene" uid="uid://bf7km6yx62lfy" path="res://levels/test_track/test_track.tscn" id="8_srlaf"]
 [ext_resource type="PackedScene" uid="uid://doj7ctj8sa7p1" path="res://levels/test_track_01/test_track_01.tscn" id="9_1nwkp"]
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ddkme"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_ovws4"]
+sky_material = SubResource("ProceduralSkyMaterial_ddkme")
+
+[sub_resource type="Environment" id="Environment_d2row"]
+background_mode = 2
+sky = SubResource("Sky_ovws4")
+ambient_light_energy = 0.2
+tonemap_mode = 2
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gv48v"]
 albedo_texture = ExtResource("2_77y82")
-uv1_scale = Vector3(8, 8, 8)
+uv1_scale = Vector3(80, 80, 80)
 
 [sub_resource type="QuadMesh" id="QuadMesh_ccm8a"]
 material = SubResource("StandardMaterial3D_gv48v")
-size = Vector2(1000, 1000)
+size = Vector2(10000, 10000)
 orientation = 1
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_4kd56"]
@@ -41,13 +54,16 @@ bg_color = Color(1, 0.516667, 0, 1)
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_ncjh0")
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_d2row")
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
 light_energy = 3.0
 shadow_enabled = true
 
 [node name="Ground" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -192.344, -640)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -952.273, -559.658, -640)
 mesh = SubResource("QuadMesh_ccm8a")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Ground"]
@@ -62,29 +78,29 @@ transform = Transform3D(9, 0, 0, 0, 9, 0, 0, 0, 9, 0, -32.8885, 0)
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, -15.2053, 0)
 
 [node name="InsidePipe" parent="." instance=ExtResource("5_0ka82")]
-transform = Transform3D(36, 0, 0, 0, 36, 0, 0, 0, 36, 0, 273.136, 0)
-visible = false
+transform = Transform3D(36, 0, 0, 0, 36, 0, 0, 0, 36, -774.01, -24.978, -20127.7)
 
 [node name="Racer" parent="." instance=ExtResource("1_e14jy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2078.93, 326.192, -27.233)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2081.83, 336.05, -27.233)
 wall_min_slide_angle = 1.0472
 floor_constant_speed = true
-speed_multiplier = 5000.0
+speed_multiplier = 6000.0
 reverse_speed_multiplier = 2000.0
 time_till_max_speed = 1.5
 acceleration_curve = SubResource("Curve_rmte1")
-boost_speed_multiplier = 9000.0
-boost_gravity_modifier = 0.25
+boost_speed_multiplier = 12000.0
 strafe_speed = 600.0
-turn_speed = 2.0
+turn_speed = 1.5
 recenter_tilt_duration = 0.07
 jump_charge_duration = 0.8
 jump_strength_multiplier = 500.0
 jump_strength_curve = SubResource("Curve_ptq4v")
-no_clip_movement_speed = 300.0
+grounded_gravity_modifier = 1.0
+boost_gravity_modifier = 1.0
+no_clip_movement_speed = 500.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -2078.93, 340.368, 11.0831)
+transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -2081.83, 350.225, 11.0831)
 current = true
 fov = 50.0
 
