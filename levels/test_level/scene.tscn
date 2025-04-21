@@ -100,7 +100,7 @@ boost_gravity_modifier = 1.0
 no_clip_movement_speed = 500.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -2081.83, 350.225, 11.0831)
+transform = Transform3D(1, 0, 0, 0, 0.994446, 0.105251, 0, -0.105251, 0.994446, -2081.83, 350.226, 11.0831)
 current = true
 fov = 50.0
 
